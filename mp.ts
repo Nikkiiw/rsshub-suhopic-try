@@ -43,15 +43,6 @@ function randomString(length = 32) {
 const defaultSUV = '1612268936507kas0gk';
 
 var key = CryptoJS.enc.Utf8.parse("www.sohu.com6666");
-function AES_Encrypt(word) {
-    var srcs = CryptoJS.enc.Utf8.parse(word);
-    var encrypted = CryptoJS.AES.encrypt(srcs, key, {
-        mode: CryptoJS.mode.ECB,
-        padding: CryptoJS.pad.Pkcs7
-    });
-    return encrypted.toString();
-}
-
 function AES_Decrypt(word) {
     var srcs = word;
     var decrypt = CryptoJS.AES.decrypt(srcs, key, {
@@ -73,10 +64,15 @@ function fetchArticle(item) {
             const videoSrc = $('script')
                 .text()
                 .match(/\s*url: "(.*?)",/)?.[1];
+            const posterEncrypted = $('script')
+                .text()
+                .match(/cover: "(.*?)",/)?.[1];
+
+            // 假设posterEncrypted是已经加密的URL
+            item.poster = AES_Decrypt(posterEncrypted);
+
             item.description = art(path.join(__dirname, 'templates/video.art'), {
-                poster: $('script')
-                    .text()
-                    .match(/cover: "(.*?)",/)?.[1],
+                poster: item.poster,
                 src: videoSrc,
                 type: videoSrc?.split('.').pop()?.toLowerCase(),
             });
